@@ -84,7 +84,7 @@ export default function RegisterPage() {
           placeholder="Full Name"
           value={form.name}
           onChange={handleChange}
-          className="w-full p-2 border rounded"
+          className="w-full p-2 border rounded text-gray-600"
           required
         />
 
@@ -94,7 +94,7 @@ export default function RegisterPage() {
           placeholder="Email"
           value={form.email}
           onChange={handleChange}
-          className="w-full p-2 border rounded"
+          className="w-full p-2 border rounded text-gray-600"
           required
         />
 
@@ -105,7 +105,7 @@ export default function RegisterPage() {
             placeholder="Password"
             value={form.password}
             onChange={handleChange}
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border rounded text-gray-600"
             required
           />
           <button
@@ -138,7 +138,7 @@ export default function RegisterPage() {
             placeholder="Confirm Password"
             value={form.confirmPassword}
             onChange={handleChange}
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border rounded text-gray-600"
             required
           />
           <button

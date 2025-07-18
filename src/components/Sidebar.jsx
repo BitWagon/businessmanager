@@ -17,6 +17,7 @@ export default function Sidebar() {
 
   const navItems = [
     { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
+    { label: 'Expanses', icon: LayoutDashboard, href: '/dashboard/expanses' },
     { label: 'Clients', icon: Users, href: '/clients' },
     { label: 'Invoices', icon: FileText, href: '/invoices' },
     { label: 'Reports', icon: BarChart2, href: '/reports' },

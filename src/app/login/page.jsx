@@ -55,7 +55,7 @@ export default function LoginPage() {
           placeholder="Email"
           value={form.email}
           onChange={handleChange}
-          className="w-full p-2 border rounded"
+          className="w-full p-2 border rounded text-gray-600"
           required
         />
 
@@ -66,7 +66,7 @@ export default function LoginPage() {
             placeholder="Password"
             value={form.password}
             onChange={handleChange}
-            className="w-full p-2 border rounded"
+            className="w-full p-2 border rounded text-gray-600"
             required
           />
           <button
