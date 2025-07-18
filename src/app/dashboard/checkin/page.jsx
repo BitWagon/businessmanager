@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { UserPlus, Clock, Building2 } from 'lucide-react';
+import { UserPlus, Building2, Clock } from 'lucide-react';
 
 export default function CheckInPage() {
   const [checkIns, setCheckIns] = useState([]);
@@ -27,10 +27,10 @@ export default function CheckInPage() {
   };
 
   return (
-    <div className="min-h-screen p-6 bg-gray-50 space-y-10">
+    <div className="min-h-screen p-6 bg-gradient-to-br from-slate-50 to-indigo-100 space-y-10">
       {/* Header */}
       <div className="flex items-center gap-4 text-2xl font-bold">
-        <UserPlus className="text-purple-600" />
+        <UserPlus className="text-green-600" />
         <h1>Check-In Dashboard</h1>
       </div>
 
@@ -66,7 +66,7 @@ export default function CheckInPage() {
 
         <button
           onClick={handleCheckIn}
-          className="mt-4 bg-purple-600 text-white px-6 py-2 rounded hover:bg-purple-700 transition"
+          className="mt-4 bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition"
         >
           Check In
         </button>

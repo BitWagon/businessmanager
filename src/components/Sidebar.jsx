@@ -9,6 +9,16 @@ import {
   Settings,
   Menu,
   X,
+  Wallet,
+  DollarSign,
+  TrendingDown,
+  PieChart,
+  ChartPie,
+  ReceiptText,
+  LogOut,
+  Check,
+  CircleCheckBigIcon,
+  ListChecks,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -17,11 +27,16 @@ export default function Sidebar() {
 
   const navItems = [
     { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
-    { label: 'Expanses', icon: LayoutDashboard, href: '/dashboard/expanses' },
-    { label: 'Clients', icon: Users, href: '/clients' },
-    { label: 'Invoices', icon: FileText, href: '/invoices' },
-    { label: 'Reports', icon: BarChart2, href: '/reports' },
-    { label: 'Settings', icon: Settings, href: '/settings' },
+    { label: 'Expanses', icon: DollarSign, href: '/dashboard/expanses' },
+    { label: 'Analysis', icon: TrendingDown, href: '/dashboard/analysis' },
+    { label: 'Employee', icon: Users, href: '/dashboard/employee' },
+    { label: 'Clients', icon: Users, href: '/dashboard/clients' },
+    { label: 'Check in', icon: CircleCheckBigIcon, href: '/dashboard/checkin' },
+    { label: 'Check out', icon: ListChecks, href: '/dashboard/checkout' },
+    { label: 'Invoices', icon: FileText, href: '/dashboard/invoices' },
+    { label: 'Reports', icon: BarChart2, href: '/dashboard/report' },
+    { label: 'Settings', icon: Settings, href: '/dashboard/setting' },
+    { label: 'Logout', icon: LogOut, href: '/dashboard/logout' },
   ];
 
   return (
@@ -33,7 +48,7 @@ export default function Sidebar() {
       >
         <div className="flex justify-between items-center p-4 border-b border-gray-700">
           <span className={`text-xl font-bold ${!isOpen && 'hidden'}`}>
-            BizSoft
+            BlackLedger
           </span>
           <button
             onClick={() => setIsOpen(!isOpen)}
