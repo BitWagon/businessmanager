@@ -29,34 +29,34 @@ export default function CheckInPage() {
   return (
     <div className="min-h-screen p-6 bg-gradient-to-br from-slate-50 to-indigo-100 space-y-10">
       {/* Header */}
-      <div className="flex items-center gap-4 text-2xl font-bold">
+      <div className="flex items-center gap-4 text-2xl font-bold text-black">
         <UserPlus className="text-green-600" />
         <h1>Check-In Dashboard</h1>
       </div>
 
       {/* Check-In Form */}
-      <div className="bg-white p-6 rounded-xl shadow-md space-y-4">
-        <h2 className="text-xl font-semibold mb-2">New Check-In</h2>
+      <div className="bg-white p-6 rounded-xl shadow-md space-y-4 ">
+        <h2 className="text-xl font-semibold mb-2 text-gray-800">New Check-In</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <input
             type="text"
             placeholder="Name"
-            className="p-2 border rounded w-full"
+            className="p-2 border rounded w-full text-gray-600"
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
           />
           <input
             type="text"
             placeholder="Department"
-            className="p-2 border rounded w-full"
+            className="p-2 border rounded w-full text-gray-600"
             value={form.department}
             onChange={(e) => setForm({ ...form, department: e.target.value })}
           />
           <input
             type="text"
             placeholder="Purpose"
-            className="p-2 border rounded w-full"
+            className="p-2 border rounded w-full text-gray-600"
             value={form.purpose}
             onChange={(e) => setForm({ ...form, purpose: e.target.value })}
           />

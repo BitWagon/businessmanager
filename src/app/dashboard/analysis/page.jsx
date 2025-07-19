@@ -66,9 +66,9 @@ export default function AnalysisPage() {
 
         {/* Recent Activity */}
         <div className="bg-white p-6 rounded-2xl shadow">
-          <h2 className="text-lg font-semibold mb-4 text-gray-700">Recent Activities</h2>
+          <h2 className="text-lg font-semibold mb-4 text-gray-800">Recent Activities</h2>
           <div className="overflow-x-auto">
-            <table className="min-w-full text-sm text-left">
+            <table className="min-w-full text-sm text-left text-gray-600">
               <thead>
                 <tr className="text-gray-500">
                   <th className="py-2 px-4">User</th>
@@ -85,7 +85,7 @@ export default function AnalysisPage() {
                   <tr key={i} className="border-b">
                     <td className="py-2 px-4">{user}</td>
                     <td className="py-2 px-4">{action}</td>
-                    <td className="py-2 px-4 text-gray-500">{time}</td>
+                    <td className="py-2 px-4 text-gray-600">{time}</td>
                   </tr>
                 ))}
               </tbody>

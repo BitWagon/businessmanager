@@ -78,7 +78,7 @@ export default function EmployeePage() {
         {/* Form */}
         {showForm && (
           <div className="bg-white rounded-xl shadow p-6 space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-600">
               {[
                 { label: 'Full Name', name: 'name' },
                 { label: 'Role', name: 'role' },
