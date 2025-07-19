@@ -1,9 +1,19 @@
 'use client';
 
 import { useState } from 'react';
-import { CreditCard, Building2, Mail, Phone, User, CheckCircle } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import {
+  CreditCard,
+  Building2,
+  Mail,
+  Phone,
+  User,
+  CheckCircle,
+  ArrowLeft,
+} from 'lucide-react';
 
 export default function CheckoutPage() {
+  const router = useRouter();
   const [form, setForm] = useState({
     company: '',
     email: '',
@@ -32,23 +42,34 @@ export default function CheckoutPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-100 p-6 flex justify-center">
       <div className="w-full max-w-4xl bg-white rounded-2xl shadow p-8 space-y-8">
-
         <h1 className="text-3xl font-bold text-gray-800 text-center">Checkout</h1>
 
         {submitted ? (
           <div className="text-center space-y-4">
             <CheckCircle className="w-12 h-12 mx-auto text-green-500" />
             <h2 className="text-xl font-semibold text-gray-700">Payment Successful</h2>
-            <p className="text-gray-600">Thank you for subscribing to our BlackLedger plan.</p>
+            <p className="text-gray-600">
+              Thank you for subscribing to our BlackLedger plan.
+            </p>
+
+            {/* Back Button after success */}
+            <button
+              onClick={() => router.push('/dashboard')}
+              className="inline-flex items-center mt-4 text-indigo-600 hover:underline"
+            >
+              <ArrowLeft className="w-4 h-4 mr-1" />
+              Back to Dashboard
+            </button>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
-
             {/* Plan Summary */}
             <div className="border border-indigo-200 rounded-xl p-4 bg-indigo-50">
               <h2 className="text-lg font-semibold text-indigo-800">Plan Summary</h2>
               <div className="mt-2 text-sm text-indigo-700">
-                <p>Business Pro Plan – <strong>$49/month</strong></p>
+                <p>
+                  Business Pro Plan – <strong>$49/month</strong>
+                </p>
                 <p>Billed monthly with full access to all modules.</p>
               </div>
             </div>
@@ -62,7 +83,7 @@ export default function CheckoutPage() {
                   <div className="relative mt-1">
                     <input
                       type="text"
-                      className="w-full border rounded-xl px-4 py-2 shadow-sm"
+                      className="w-full border rounded-xl px-4 py-2 shadow-sm text-gray-600"
                       value={form.company}
                       onChange={(e) => setForm({ ...form, company: e.target.value })}
                     />
@@ -74,7 +95,7 @@ export default function CheckoutPage() {
                   <div className="relative mt-1">
                     <input
                       type="text"
-                      className="w-full border rounded-xl px-4 py-2 shadow-sm"
+                      className="w-full border rounded-xl px-4 py-2 shadow-sm text-gray-600"
                       value={form.name}
                       onChange={(e) => setForm({ ...form, name: e.target.value })}
                     />
@@ -86,7 +107,7 @@ export default function CheckoutPage() {
                   <div className="relative mt-1">
                     <input
                       type="email"
-                      className="w-full border rounded-xl px-4 py-2 shadow-sm"
+                      className="w-full border rounded-xl px-4 py-2 shadow-sm text-gray-600"
                       value={form.email}
                       onChange={(e) => setForm({ ...form, email: e.target.value })}
                     />
@@ -98,7 +119,7 @@ export default function CheckoutPage() {
                   <div className="relative mt-1">
                     <input
                       type="text"
-                      className="w-full border rounded-xl px-4 py-2 shadow-sm"
+                      className="w-full border rounded-xl px-4 py-2 shadow-sm text-gray-600"
                       value={form.phone}
                       onChange={(e) => setForm({ ...form, phone: e.target.value })}
                     />
@@ -117,7 +138,7 @@ export default function CheckoutPage() {
                   <div className="relative mt-1">
                     <input
                       type="text"
-                      className="w-full border rounded-xl px-4 py-2 shadow-sm"
+                      className="w-full border rounded-xl px-4 py-2 shadow-sm text-gray-600"
                       placeholder="1234 5678 9012 3456"
                       value={form.cardNumber}
                       onChange={(e) => setForm({ ...form, cardNumber: e.target.value })}
@@ -129,7 +150,7 @@ export default function CheckoutPage() {
                   <label className="text-sm font-medium text-gray-600">Expiry Date</label>
                   <input
                     type="text"
-                    className="w-full border rounded-xl px-4 py-2 shadow-sm mt-1"
+                    className="w-full border rounded-xl px-4 py-2 shadow-sm mt-1 text-gray-600"
                     placeholder="MM/YY"
                     value={form.expiry}
                     onChange={(e) => setForm({ ...form, expiry: e.target.value })}
@@ -139,7 +160,7 @@ export default function CheckoutPage() {
                   <label className="text-sm font-medium text-gray-600">CVC</label>
                   <input
                     type="text"
-                    className="w-full border rounded-xl px-4 py-2 shadow-sm mt-1"
+                    className="w-full border rounded-xl px-4 py-2 shadow-sm mt-1 text-gray-600"
                     placeholder="123"
                     value={form.cvc}
                     onChange={(e) => setForm({ ...form, cvc: e.target.value })}
@@ -154,6 +175,7 @@ export default function CheckoutPage() {
             >
               Complete Checkout
             </button>
+            
           </form>
         )}
       </div>

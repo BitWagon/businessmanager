@@ -97,14 +97,14 @@ export default function SettingsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-100 p-6 space-y-10">
       {/* Header */}
-      <div className="text-2xl font-bold flex items-center gap-2">
+      <div className="text-2xl font-bold flex items-center gap-2 text-black">
         <Settings className="text-indigo-600" />
         Settings
       </div>
 
       {/* Profile Settings */}
       <div className="bg-white p-6 rounded-xl shadow space-y-4">
-        <div className="text-lg font-semibold flex items-center gap-2">
+        <div className="text-lg font-semibold flex items-center gap-2 text-gray-700">
           <User className="text-blue-500" />
           Profile Information
         </div>
@@ -113,14 +113,14 @@ export default function SettingsPage() {
           placeholder="Full Name"
           value={profile.name}
           onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-          className="w-full p-2 border rounded"
+          className="w-full p-2 border rounded text-gray-600"
         />
         <input
           type="email"
           placeholder="Email"
           value={profile.email}
           onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-          className="w-full p-2 border rounded"
+          className="w-full p-2 border rounded text-gray-600"
         />
         <button
           onClick={handleSaveProfile}
@@ -134,7 +134,7 @@ export default function SettingsPage() {
 
       {/* Company Settings */}
       <div className="bg-white p-6 rounded-xl shadow space-y-4">
-        <div className="text-lg font-semibold flex items-center gap-2">
+        <div className="text-lg font-semibold flex items-center gap-2 text-gray-700">
           <Building2 className="text-green-500" />
           Company Settings
         </div>
@@ -145,7 +145,7 @@ export default function SettingsPage() {
           onChange={(e) =>
             setCompany({ ...company, companyName: e.target.value })
           }
-          className="w-full p-2 border rounded"
+          className="w-full p-2 border rounded text-gray-600"
         />
         <input
           type="text"
@@ -154,7 +154,7 @@ export default function SettingsPage() {
           onChange={(e) =>
             setCompany({ ...company, timezone: e.target.value })
           }
-          className="w-full p-2 border rounded"
+          className="w-full p-2 border rounded text-gray-600"
         />
         <button
           onClick={handleSaveCompany}
@@ -168,7 +168,7 @@ export default function SettingsPage() {
 
       {/* Change Password with Toggle */}
       <div className="bg-white p-6 rounded-xl shadow space-y-4">
-        <div className="text-lg font-semibold flex items-center gap-2">
+        <div className="text-lg font-semibold flex items-center gap-2 text-gray-700">
           <Lock className="text-purple-500" />
           Change Password
         </div>
@@ -182,7 +182,7 @@ export default function SettingsPage() {
             onChange={(e) =>
               setPasswords({ ...passwords, current: e.target.value })
             }
-            className="w-full p-2 border rounded pr-20"
+            className="w-full p-2 border rounded pr-20 text-gray-600"
           />
           <button
             type="button"
@@ -207,7 +207,7 @@ export default function SettingsPage() {
             onChange={(e) =>
               setPasswords({ ...passwords, new: e.target.value })
             }
-            className="w-full p-2 border rounded pr-20"
+            className="w-full p-2 border rounded pr-20 text-gray-600"
           />
           <button
             type="button"
@@ -232,7 +232,7 @@ export default function SettingsPage() {
             onChange={(e) =>
               setPasswords({ ...passwords, confirm: e.target.value })
             }
-            className="w-full p-2 border rounded pr-20"
+            className="w-full p-2 border rounded pr-20 text-gray-600"
           />
           <button
             type="button"

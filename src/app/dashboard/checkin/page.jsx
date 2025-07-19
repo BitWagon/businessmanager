@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { UserPlus, Building2, Clock } from 'lucide-react';
+import { UserPlus, Building2, Clock, Trash2 } from 'lucide-react';
 
 export default function CheckInPage() {
   const [checkIns, setCheckIns] = useState([]);
@@ -26,6 +26,13 @@ export default function CheckInPage() {
     setError('');
   };
 
+  const handleTerminate = (id) => {
+    const confirmed = confirm("Are you sure you want to terminate this check-in?");
+    if (confirmed) {
+      setCheckIns((prev) => prev.filter((entry) => entry.id !== id));
+    }
+  };
+
   return (
     <div className="min-h-screen p-6 bg-gradient-to-br from-slate-50 to-indigo-100 space-y-10">
       {/* Header */}
@@ -35,7 +42,7 @@ export default function CheckInPage() {
       </div>
 
       {/* Check-In Form */}
-      <div className="bg-white p-6 rounded-xl shadow-md space-y-4 ">
+      <div className="bg-white p-6 rounded-xl shadow-md space-y-4">
         <h2 className="text-xl font-semibold mb-2 text-gray-800">New Check-In</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -74,7 +81,7 @@ export default function CheckInPage() {
 
       {/* Check-In List */}
       <div className="bg-white p-6 rounded-xl shadow-md">
-        <h2 className="text-xl font-semibold mb-4">Check-In Records</h2>
+        <h2 className="text-xl font-semibold mb-4 text-gray-800">Check-In Records</h2>
 
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm text-left">
@@ -84,20 +91,30 @@ export default function CheckInPage() {
                 <th className="px-4 py-2">Department</th>
                 <th className="px-4 py-2">Purpose</th>
                 <th className="px-4 py-2">Time</th>
+                <th className="px-4 py-2">Action</th>
               </tr>
             </thead>
             <tbody>
               {checkIns.map((entry) => (
-                <tr key={entry.id} className="border-t">
+                <tr key={entry.id} className="border-t text-gray-600">
                   <td className="px-4 py-2">{entry.name}</td>
                   <td className="px-4 py-2">{entry.department}</td>
                   <td className="px-4 py-2">{entry.purpose}</td>
                   <td className="px-4 py-2">{entry.time}</td>
+                  <td className="px-4 py-2">
+                    <button
+                      onClick={() => handleTerminate(entry.id)}
+                      className="text-red-600 hover:text-red-800 flex items-center gap-1"
+                    >
+                      <Trash2 size={16} />
+                      Terminate
+                    </button>
+                  </td>
                 </tr>
               ))}
               {checkIns.length === 0 && (
                 <tr>
-                  <td colSpan="4" className="text-center text-gray-500 py-4">
+                  <td colSpan="5" className="text-center text-gray-500 py-4">
                     No check-ins yet.
                   </td>
                 </tr>
