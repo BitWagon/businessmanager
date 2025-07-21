@@ -48,7 +48,7 @@ export default function ExpensePage() {
           <Wallet className="text-purple-600" />
           <div>
             <h4 className="text-sm text-gray-700">Total Spent</h4>
-            <p className="text-xl font-bold">${expenses.reduce((acc, e) => acc + e.amount, 0)}</p>
+            <p className="text-xl font-bold text-gray-600">${expenses.reduce((acc, e) => acc + e.amount, 0)}</p>
           </div>
         </div>
         <div className="bg-white p-6 rounded-xl shadow flex items-center gap-4">
