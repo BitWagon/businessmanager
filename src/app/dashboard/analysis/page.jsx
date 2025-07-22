@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   TrendingUp,
   BarChart3,
@@ -8,19 +8,80 @@ import {
   LineChart,
   ArrowRight,
 } from 'lucide-react';
-import { LineChart as RLChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-
-const data = [
-  { name: 'Mon', value: 2400 },
-  { name: 'Tue', value: 1398 },
-  { name: 'Wed', value: 9800 },
-  { name: 'Thu', value: 3908 },
-  { name: 'Fri', value: 4800 },
-  { name: 'Sat', value: 3800 },
-  { name: 'Sun', value: 4300 },
-];
+import {
+  LineChart as RLChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
 
 export default function AnalysisPage() {
+  const [expenses, setExpenses] = useState([]);
+  const [weeklyData, setWeeklyData] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [weeklyGrowth, setWeeklyGrowth] = useState('0%');
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    const res = await fetch('/api/expenses');
+    const data = await res.json();
+    setExpenses(data);
+    calculateWeeklyPerformance(data);
+  };
+
+  const calculateWeeklyPerformance = (data) => {
+    const today = new Date();
+    const last7 = Array(7)
+      .fill()
+      .map((_, i) => {
+        const date = new Date(today);
+        date.setDate(today.getDate() - i);
+        return date.toLocaleDateString('en-US', { weekday: 'short' });
+      })
+      .reverse();
+
+    const weekMap = {};
+    last7.forEach((day) => (weekMap[day] = 0));
+
+    let totalAmount = 0;
+    data.forEach((e) => {
+      const d = new Date(e.date);
+      const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
+      if (weekMap.hasOwnProperty(dayName)) {
+        weekMap[dayName] += parseFloat(e.amount);
+        totalAmount += parseFloat(e.amount);
+      }
+    });
+
+    const formatted = Object.entries(weekMap).map(([name, value]) => ({
+      name,
+      value,
+    }));
+
+    setWeeklyData(formatted);
+    setTotal(totalAmount.toFixed(2));
+
+    // Growth rate logic (optional, based on previous 7 days)
+    const now = new Date();
+    const prevWeekTotal = data
+      .filter((e) => {
+        const date = new Date(e.date);
+        const diff = (now - date) / (1000 * 60 * 60 * 24);
+        return diff > 7 && diff <= 14;
+      })
+      .reduce((acc, e) => acc + parseFloat(e.amount), 0);
+
+    if (prevWeekTotal > 0) {
+      const growth = ((totalAmount - prevWeekTotal) / prevWeekTotal) * 100;
+      setWeeklyGrowth(`${growth.toFixed(1)}%`);
+    }
+  };
+
   return (
     <div className="min-h-screen p-6 bg-gradient-to-br from-slate-50 to-indigo-100">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -28,18 +89,15 @@ export default function AnalysisPage() {
         {/* Header */}
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold text-slate-800">Analytics Dashboard</h1>
-          <button className="bg-indigo-600 text-white px-4 py-2 rounded-xl hover:bg-indigo-700 transition">
-            Export Report
-          </button>
         </div>
 
-        {/* Metrics Section */}
+        {/* Metrics */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
           {[
-            { icon: TrendingUp, label: 'Growth Rate', value: '24%' },
-            { icon: BarChart3, label: 'New Users', value: '1,239' },
-            { icon: Activity, label: 'Activity', value: '87%' },
-            { icon: LineChart, label: 'Sessions', value: '9,321' },
+            { icon: TrendingUp, label: 'Weekly Growth', value: weeklyGrowth },
+            { icon: BarChart3, label: 'Total Expenses', value: `$${total}` },
+            { icon: Activity, label: 'Expense Records', value: expenses.length },
+            { icon: LineChart, label: 'Tracked Days', value: weeklyData.length },
           ].map((item, i) => (
             <div key={i} className="bg-white rounded-2xl shadow p-6 flex items-center space-x-4">
               <item.icon className="text-indigo-600 w-6 h-6" />
@@ -51,11 +109,11 @@ export default function AnalysisPage() {
           ))}
         </div>
 
-        {/* Line Chart */}
-        <div className="bg-white p-6 rounded-2xl shadow">
-          <h2 className="text-lg font-semibold mb-4 text-gray-700">Weekly Performance</h2>
-          <ResponsiveContainer width="100%" height={300} className="text-gray-600">
-            <RLChart data={data}>
+        {/* Weekly Line Chart */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm">
+          <h2 className="text-lg font-semibold mb-4 text-gray-700">Weekly Expenses</h2>
+          <ResponsiveContainer width="100%" height={300}>
+            <RLChart data={weeklyData}>
               <XAxis dataKey="name" />
               <YAxis />
               <Tooltip />
@@ -64,42 +122,13 @@ export default function AnalysisPage() {
           </ResponsiveContainer>
         </div>
 
-        {/* Recent Activity */}
-        <div className="bg-white p-6 rounded-2xl shadow">
-          <h2 className="text-lg font-semibold mb-4 text-gray-800">Recent Activities</h2>
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm text-left text-gray-600">
-              <thead>
-                <tr className="text-gray-500">
-                  <th className="py-2 px-4">User</th>
-                  <th className="py-2 px-4">Action</th>
-                  <th className="py-2 px-4">Time</th>
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  ['John Doe', 'Logged in', '2 min ago'],
-                  ['Jane Smith', 'Updated profile', '10 min ago'],
-                  ['Alice', 'Generated report', '1 hour ago'],
-                ].map(([user, action, time], i) => (
-                  <tr key={i} className="border-b">
-                    <td className="py-2 px-4">{user}</td>
-                    <td className="py-2 px-4">{action}</td>
-                    <td className="py-2 px-4 text-gray-600">{time}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Insights Summary */}
+        {/* Summary */}
         <div className="bg-white p-6 rounded-2xl shadow space-y-3">
           <h2 className="text-lg font-semibold text-gray-700">Insights</h2>
           <ul className="list-disc pl-5 space-y-1 text-gray-600">
-            <li>Peak traffic on Wednesday — consider boosting performance those days.</li>
-            <li>Users are most active between 10 AM and 12 PM.</li>
-            <li>Mobile usage up by 34% this week.</li>
+            <li>You have logged {expenses.length} expenses so far.</li>
+            <li>This week’s total expense: ${total}</li>
+            <li>Growth compared to last week: {weeklyGrowth}</li>
           </ul>
           <button className="mt-4 inline-flex items-center text-indigo-600 hover:underline">
             View Full Report <ArrowRight className="ml-2 w-4 h-4" />

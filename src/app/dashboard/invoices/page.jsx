@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   FileText,
   PlusCircle,
@@ -14,42 +14,61 @@ import {
 
 export default function InvoicesPage() {
   const [invoices, setInvoices] = useState([]);
-  const [form, setForm] = useState({
-    client: '',
-    amount: '',
-    date: '',
-  });
+  const [form, setForm] = useState({ client: '', amount: '', date: '' });
   const [error, setError] = useState('');
 
-  const handleAddInvoice = () => {
+  // ✅ Fetch invoices on mount
+  useEffect(() => {
+    const fetchInvoices = async () => {
+      const res = await fetch('/api/invoices');
+      const data = await res.json();
+      setInvoices(data);
+    };
+    fetchInvoices();
+  }, []);
+
+  // ✅ Add invoice
+  const handleAddInvoice = async () => {
     if (!form.client || !form.amount || !form.date) {
       setError('All fields are required');
       return;
     }
 
-    const newInvoice = {
-      id: Date.now(),
-      ...form,
-      status: 'Unpaid',
-    };
+    const res = await fetch('/api/invoices', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...form, status: 'Unpaid' }),
+    });
 
+    const newInvoice = await res.json();
     setInvoices([newInvoice, ...invoices]);
     setForm({ client: '', amount: '', date: '' });
     setError('');
   };
 
-  const handleDelete = (id) => {
-    setInvoices(invoices.filter((inv) => inv.id !== id));
+  // ✅ Toggle status
+  const handleToggleStatus = async (id) => {
+    const target = invoices.find((inv) => inv._id === id);
+    const updated = {
+      ...target,
+      status: target.status === 'Unpaid' ? 'Paid' : 'Unpaid',
+    };
+
+    await fetch(`/api/invoices/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: updated.status }),
+    });
+
+    setInvoices(
+      invoices.map((inv) => (inv._id === id ? updated : inv))
+    );
   };
 
-  const handleToggleStatus = (id) => {
-    setInvoices(
-      invoices.map((inv) =>
-        inv.id === id
-          ? { ...inv, status: inv.status === 'Unpaid' ? 'Paid' : 'Unpaid' }
-          : inv
-      )
-    );
+  // ✅ Delete invoice
+  const handleDelete = async (id) => {
+    await fetch(`/api/invoices/${id}`, { method: 'DELETE' });
+    setInvoices(invoices.filter((inv) => inv._id !== id));
   };
 
   const unpaidInvoices = invoices.filter((inv) => inv.status === 'Unpaid');
@@ -57,13 +76,12 @@ export default function InvoicesPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-100 p-6 space-y-10">
-      {/* Header */}
       <div className="flex items-center gap-3 text-2xl font-bold">
         <FileText className="text-indigo-600" />
         <h1 className="text-black">Invoices</h1>
       </div>
 
-      {/* New Invoice Form */}
+      {/* Form */}
       <div className="bg-white p-6 rounded-xl shadow space-y-4">
         <h2 className="text-lg font-semibold text-gray-700">Create New Invoice</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -98,7 +116,7 @@ export default function InvoicesPage() {
         </button>
       </div>
 
-      {/* Unpaid Invoices */}
+      {/* Tables */}
       <InvoiceTable
         title="Unpaid Invoices"
         invoices={unpaidInvoices}
@@ -108,8 +126,6 @@ export default function InvoicesPage() {
         actionIcon={<CheckCircle size={16} />}
         actionColor="text-green-600 hover:text-green-800"
       />
-
-      {/* Paid Invoices */}
       <InvoiceTable
         title="Paid Invoices"
         invoices={paidInvoices}
@@ -140,7 +156,7 @@ function InvoiceTable({ title, invoices, onDelete, onToggleStatus, actionLabel, 
           </thead>
           <tbody>
             {invoices.map((invoice) => (
-              <tr key={invoice.id} className="border-t">
+              <tr key={invoice._id} className="border-t">
                 <td className="px-4 py-2 flex items-center gap-2 text-gray-600">
                   <User className="w-4 h-4 text-gray-500" />
                   {invoice.client}
@@ -154,26 +170,16 @@ function InvoiceTable({ title, invoices, onDelete, onToggleStatus, actionLabel, 
                   {invoice.date}
                 </td>
                 <td className="px-4 py-2">
-                  <span
-                    className={`font-medium ${
-                      invoice.status === 'Paid' ? 'text-green-700' : 'text-yellow-700'
-                    }`}
-                  >
+                  <span className={`font-medium ${invoice.status === 'Paid' ? 'text-green-700' : 'text-yellow-700'}`}>
                     {invoice.status}
                   </span>
                 </td>
                 <td className="px-4 py-2 flex gap-2">
-                  <button
-                    onClick={() => onToggleStatus(invoice.id)}
-                    className={`${actionColor} flex items-center gap-1`}
-                  >
+                  <button onClick={() => onToggleStatus(invoice._id)} className={`${actionColor} flex items-center gap-1`}>
                     {actionIcon}
                     {actionLabel}
                   </button>
-                  <button
-                    onClick={() => onDelete(invoice.id)}
-                    className="text-red-600 hover:text-red-800"
-                  >
+                  <button onClick={() => onDelete(invoice._id)} className="text-red-600 hover:text-red-800">
                     <Trash2 size={16} />
                   </button>
                 </td>
