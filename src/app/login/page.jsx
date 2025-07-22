@@ -31,8 +31,11 @@ export default function LoginPage() {
 
       if (!res.ok) throw new Error(data.message || 'Login failed');
 
+      // ✅ Store JWT token in localStorage
+      localStorage.setItem('authToken', data.token);
+
       toast.success('Logged in successfully!');
-      router.push('/dashboard'); // Change this route to your main page
+      router.push('/dashboard'); // Redirect to dashboard
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -81,7 +84,7 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
+          className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition"
         >
           {loading ? 'Logging in...' : 'Login'}
         </button>

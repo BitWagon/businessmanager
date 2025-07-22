@@ -1,31 +1,36 @@
+// src/app/api/login/route.js
+import { connectDB } from '@/config/mongoose';
+import User from '@/models/User';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import { NextResponse } from 'next/server';
 
-export async function POST(req) {
+export const POST = async (req) => {
+  await connectDB();
+
   try {
     const { email, password } = await req.json();
 
-    if (!email || !password) {
-      return NextResponse.json(
-        { message: 'Email and password are required.' },
-        { status: 400 }
-      );
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return NextResponse.json({ message: 'Invalid email or password' }, { status: 401 });
     }
 
-    // 🔐 TODO: Replace with DB query and hashed password check
-    const fakeUser = {
-      email: 'test@example.com',
-      password: 'Test123', // In production: hashed & compared with bcrypt
-    };
+    const isMatch = await bcrypt.compare(password, user.password);
 
-    if (email !== fakeUser.email || password !== fakeUser.password) {
-      return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
+    if (!isMatch) {
+      return NextResponse.json({ message: 'Invalid email or password' }, { status: 401 });
     }
 
-    // 🔐 TODO: Add JWT or session logic here
+    const token = jwt.sign(
+      { userId: user._id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
 
-    return NextResponse.json({ message: 'Login successful' }, { status: 200 });
+    return NextResponse.json({ token }, { status: 200 });
   } catch (err) {
-    console.error('Login error:', err);
-    return NextResponse.json({ message: 'Server error' }, { status: 500 });
+    return NextResponse.json({ message: 'Server error', error: err.message }, { status: 500 });
   }
-}
+};

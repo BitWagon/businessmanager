@@ -1,4 +1,3 @@
-// components/LogoutButton.jsx
 'use client';
 
 import { LogOut } from 'lucide-react';
@@ -8,8 +7,9 @@ export default function LogoutButton() {
   const router = useRouter();
 
   const handleLogout = async () => {
+    localStorage.removeItem('authToken'); // ✅ Remove token
     await fetch('/api/logout');
-    router.push('/login'); // Redirect to login page
+    router.push('/login');
   };
 
   return (

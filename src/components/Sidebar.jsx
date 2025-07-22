@@ -30,7 +30,6 @@ export default function Sidebar() {
     { label: 'Expanses', icon: DollarSign, href: '/dashboard/expanses' },
     { label: 'Analysis', icon: TrendingDown, href: '/dashboard/analysis' },
     { label: 'Employee', icon: Users, href: '/dashboard/employee' },
-    { label: 'Clients', icon: Users, href: '/dashboard/clients' },
     { label: 'Check in', icon: CircleCheckBigIcon, href: '/dashboard/checkin' },
     { label: 'Check out', icon: ListChecks, href: '/dashboard/checkout' },
     { label: 'Invoices', icon: FileText, href: '/dashboard/invoices' },

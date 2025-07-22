@@ -1,61 +1,90 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Plus,
   Wallet,
   CalendarDays,
   FileText,
   BarChart3,
-  CircleMinus
+  CircleMinus,
 } from 'lucide-react';
 
 export default function ExpensePage() {
-  const [expenses, setExpenses] = useState([
-    { id: 1, title: 'Marketing', amount: 250, category: 'Ads', date: '2025-07-15' },
-    { id: 2, title: 'Cloud Hosting', amount: 120, category: 'Server', date: '2025-07-13' },
-  ]);
-
+  const [expenses, setExpenses] = useState([]);
   const [newExpense, setNewExpense] = useState({ title: '', amount: '', category: '' });
 
-  const handleAddExpense = () => {
-    if (!newExpense.title || !newExpense.amount || !newExpense.category) return;
-    const updated = [
-      ...expenses,
-      {
-        ...newExpense,
-        id: Date.now(),
-        date: new Date().toISOString().split('T')[0],
-        amount: parseFloat(newExpense.amount),
-      },
-    ];
-    setExpenses(updated);
-    setNewExpense({ title: '', amount: '', category: '' });
+  useEffect(() => {
+    fetchExpenses();
+  }, []);
+
+  const fetchExpenses = async () => {
+    const res = await fetch('/api/expenses');
+    const data = await res.json();
+    setExpenses(data);
   };
 
-  const handleRemoveExpense = () => {
-    if (expenses.length === 0) return;
-    setExpenses((prev) => prev.slice(0, -1));
+  const handleAddExpense = async () => {
+    if (!newExpense.title || !newExpense.amount || !newExpense.category) return;
+
+    const res = await fetch('/api/expenses', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newExpense),
+    });
+
+    if (res.ok) {
+      setNewExpense({ title: '', amount: '', category: '' });
+      fetchExpenses();
+    }
   };
+
+  const handleDeleteExpense = async (id) => {
+    const confirmed = confirm('Are you sure you want to delete this expense?');
+    if (!confirmed) return;
+
+    const res = await fetch(`/api/expenses/${id}`, {
+      method: 'DELETE',
+    });
+
+    if (res.ok) {
+      fetchExpenses(); // Refresh the list
+    }
+  };
+
 
   return (
     <div className="p-6 space-y-10 bg-gray-50 min-h-screen">
       <h2 className='font-black text-black text-2xl'>Expenses</h2>
 
-      {/* 1. Overview */}
+      {/* Overview */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white p-6 rounded-xl shadow flex items-center gap-4">
           <Wallet className="text-purple-600" />
           <div>
             <h4 className="text-sm text-gray-700">Total Spent</h4>
-            <p className="text-xl font-bold text-gray-600">${expenses.reduce((acc, e) => acc + e.amount, 0)}</p>
+            <p className="text-xl font-bold text-gray-600">
+              ${expenses.reduce((acc, e) => acc + parseFloat(e.amount), 0).toFixed(2)}
+            </p>
           </div>
         </div>
         <div className="bg-white p-6 rounded-xl shadow flex items-center gap-4">
           <CalendarDays className="text-green-600" />
           <div>
             <h4 className="text-sm text-gray-700">This Month</h4>
-            <p className="text-xl font-bold text-gray-600">$370</p>
+            <p className="text-xl font-bold text-gray-600">
+              ${expenses
+                .filter((e) => {
+                  const expenseDate = new Date(e.date);
+                  const now = new Date();
+                  return (
+                    expenseDate.getMonth() === now.getMonth() &&
+                    expenseDate.getFullYear() === now.getFullYear()
+                  );
+                })
+                .reduce((acc, e) => acc + parseFloat(e.amount), 0)
+                .toFixed(2)}
+            </p>
           </div>
         </div>
         <div className="bg-white p-6 rounded-xl shadow flex items-center gap-4">
@@ -67,7 +96,7 @@ export default function ExpensePage() {
         </div>
       </section>
 
-      {/* 2. Recent Expenses */}
+      {/* Recent Expenses */}
       <section>
         <h2 className="text-2xl font-semibold mb-4 text-gray-700">Recent Expenses</h2>
         <div className="bg-white rounded-xl shadow overflow-hidden text-gray-600">
@@ -78,15 +107,25 @@ export default function ExpensePage() {
                 <th className="px-6 py-3">Amount</th>
                 <th className="px-6 py-3">Category</th>
                 <th className="px-6 py-3">Date</th>
+                <th className="px-6 py-3">Actions</th>
               </tr>
             </thead>
             <tbody>
               {expenses.map((e) => (
-                <tr key={e.id} className="border-t">
+                <tr key={e._id} className="border-t">
                   <td className="px-6 py-4">{e.title}</td>
                   <td className="px-6 py-4">${e.amount}</td>
                   <td className="px-6 py-4">{e.category}</td>
-                  <td className="px-6 py-4">{e.date}</td>
+                  <td className="px-6 py-4">
+                    {new Date(e.date).toLocaleDateString()}
+                  </td>
+                  <button
+                    onClick={() => handleDeleteExpense(e._id)}
+                    className="text-red-600 hover:underline text-sm flex items-center gap-1"
+                  >
+                    <CircleMinus className="w-4 h-4" />
+                    Delete
+                  </button>
                 </tr>
               ))}
             </tbody>
@@ -94,7 +133,7 @@ export default function ExpensePage() {
         </div>
       </section>
 
-      {/* 3. Add New Expense */}
+      {/* Add Expense */}
       <section>
         <h2 className="text-2xl font-semibold mb-4 text-gray-700">Add Expense</h2>
         <div className="bg-white p-6 rounded-xl shadow space-y-4 text-gray-600">
@@ -122,25 +161,16 @@ export default function ExpensePage() {
             />
           </div>
 
-          <div className="flex gap-4">
-            <button
-              onClick={handleAddExpense}
-              className="bg-purple-600 text-white px-6 py-2 rounded hover:bg-purple-700 flex items-center gap-2"
-            >
-              <Plus size={16} /> Add Expense
-            </button>
-
-            <button
-              onClick={handleRemoveExpense}
-              className="bg-red-500 text-white px-6 py-2 rounded hover:bg-red-600 flex items-center gap-2 "
-            >
-              <CircleMinus size={16} /> Remove Last
-            </button>
-          </div>
+          <button
+            onClick={handleAddExpense}
+            className="bg-purple-600 text-white px-6 py-2 rounded hover:bg-purple-700 flex items-center gap-2"
+          >
+            <Plus size={16} /> Add Expense
+          </button>
         </div>
       </section>
 
-      {/* 4. Expense Categories */}
+      {/* Categories */}
       <section>
         <h2 className="text-2xl font-semibold mb-4 text-gray-700">Expense Categories</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-gray-600">
@@ -148,14 +178,14 @@ export default function ExpensePage() {
             <div key={idx} className="bg-white p-4 rounded-lg shadow text-center">
               <p className="font-medium">{cat}</p>
               <p className="text-gray-500 text-sm">
-                ${expenses.filter((e) => e.category === cat).reduce((acc, e) => acc + e.amount, 0)}
+                ${expenses.filter((e) => e.category === cat).reduce((acc, e) => acc + parseFloat(e.amount), 0)}
               </p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* 5. Monthly Chart Placeholder */}
+      {/* Chart Placeholder */}
       <section>
         <h2 className="text-2xl font-semibold mb-4 text-gray-700">Monthly Expense Chart</h2>
         <div className="bg-white p-10 rounded-xl shadow flex justify-center items-center h-64 text-gray-400">
