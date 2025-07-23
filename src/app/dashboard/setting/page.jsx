@@ -1,73 +1,64 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import {
-  Settings,
-  User,
-  Lock,
-  Building2,
-  Save,
-} from 'lucide-react';
+import { Settings, User, Save, Lock } from 'lucide-react';
 
 export default function SettingsPage() {
   const [profile, setProfile] = useState({ name: '', email: '' });
-  const [company, setCompany] = useState({ companyName: '', timezone: '' });
+  const [status, setStatus] = useState('');
   const [passwords, setPasswords] = useState({
     current: '',
     new: '',
     confirm: '',
-    showCurrent: false,
-    showNew: false,
-    showConfirm: false,
   });
-  const [status, setStatus] = useState({
-    profile: '',
-    company: '',
-    password: '',
-  });
+  const [passwordStatus, setPasswordStatus] = useState('');
 
   useEffect(() => {
     const fetchUser = async () => {
-      const res = await fetch('/api/me');
-      const data = await res.json();
-      setProfile({ name: data.name, email: data.email });
-      setCompany({ companyName: data.companyName || '', timezone: data.timezone || '' });
+     const res = await fetch('/api/me', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+        });
+      if (res.ok) {
+        const data = await res.json();
+        setProfile({ name: data.name, email: data.email });
+      }
     };
     fetchUser();
   }, []);
 
-  const handleSaveProfile = async () => {
+  const handleSave = async () => {
     const res = await fetch('/api/settings/profile', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(profile),
+      body: JSON.stringify({ name: profile.name }),
     });
-    const msg = res.ok ? 'Profile saved!' : 'Error saving profile.';
-    setStatus((prev) => ({ ...prev, profile: msg }));
-  };
-
-  const handleSaveCompany = async () => {
-    const res = await fetch('/api/settings/company', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(company),
-    });
-    const msg = res.ok ? 'Company info updated!' : 'Error updating company.';
-    setStatus((prev) => ({ ...prev, company: msg }));
+    setStatus(res.ok ? 'Profile updated successfully!' : 'Error updating profile.');
   };
 
   const handlePasswordChange = async () => {
     if (passwords.new !== passwords.confirm) {
-      setStatus((prev) => ({ ...prev, password: 'New passwords do not match.' }));
+      setPasswordStatus('New passwords do not match.');
       return;
     }
+
     const res = await fetch('/api/settings/password', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(passwords),
+      body: JSON.stringify({
+        current: passwords.current,
+        new: passwords.new,
+      }),
     });
-    const msg = res.ok ? 'Password updated!' : 'Password update failed.';
-    setStatus((prev) => ({ ...prev, password: msg }));
+
+    if (res.ok) {
+      setPasswordStatus('Password changed successfully!');
+      setPasswords({ current: '', new: '', confirm: '' });
+    } else {
+      const data = await res.json();
+      setPasswordStatus(data.error || 'Error changing password.');
+    }
   };
 
   return (
@@ -77,12 +68,13 @@ export default function SettingsPage() {
         Settings
       </div>
 
-      {/* Profile */}
+      {/* Profile Info */}
       <div className="bg-white p-6 rounded-xl shadow space-y-4">
         <div className="text-lg font-semibold flex items-center gap-2 text-gray-700">
           <User className="text-blue-500" />
-          Profile Information
+          Profile
         </div>
+
         <input
           type="text"
           placeholder="Full Name"
@@ -90,6 +82,7 @@ export default function SettingsPage() {
           onChange={(e) => setProfile({ ...profile, name: e.target.value })}
           className="w-full p-2 border rounded text-gray-600"
         />
+
         <input
           type="email"
           placeholder="Email"
@@ -97,75 +90,49 @@ export default function SettingsPage() {
           disabled
           className="w-full p-2 border rounded text-gray-400 cursor-not-allowed bg-gray-100"
         />
+
         <button
-          onClick={handleSaveProfile}
+          onClick={handleSave}
           className="bg-blue-600 text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-blue-700"
         >
           <Save size={16} />
-          Save Profile
+          Save
         </button>
-        <p className="text-sm text-gray-500">{status.profile}</p>
+
+        <p className="text-sm text-gray-500">{status}</p>
       </div>
 
-      {/* Company Info */}
-      <div className="bg-white p-6 rounded-xl shadow space-y-4">
-        <div className="text-lg font-semibold flex items-center gap-2 text-gray-700">
-          <Building2 className="text-green-500" />
-          Company Settings
-        </div>
-        <input
-          type="text"
-          placeholder="Company Name"
-          value={company.companyName}
-          onChange={(e) => setCompany({ ...company, companyName: e.target.value })}
-          className="w-full p-2 border rounded text-gray-600"
-        />
-        <input
-          type="text"
-          placeholder="Timezone"
-          value={company.timezone}
-          onChange={(e) => setCompany({ ...company, timezone: e.target.value })}
-          className="w-full p-2 border rounded text-gray-600"
-        />
-        <button
-          onClick={handleSaveCompany}
-          className="bg-green-600 text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-green-700"
-        >
-          <Save size={16} />
-          Save Company Info
-        </button>
-        <p className="text-sm text-gray-500">{status.company}</p>
-      </div>
-
-      {/* Password Change */}
+      {/* Change Password */}
       <div className="bg-white p-6 rounded-xl shadow space-y-4">
         <div className="text-lg font-semibold flex items-center gap-2 text-gray-700">
           <Lock className="text-purple-500" />
           Change Password
         </div>
-        {['current', 'new', 'confirm'].map((field) => (
-          <div className="relative" key={field}>
-            <input
-              type={passwords[`show${field[0].toUpperCase() + field.slice(1)}`] ? 'text' : 'password'}
-              placeholder={`${field === 'confirm' ? 'Confirm' : field === 'current' ? 'Current' : 'New'} Password`}
-              value={passwords[field]}
-              onChange={(e) => setPasswords({ ...passwords, [field]: e.target.value })}
-              className="w-full p-2 border rounded pr-20 text-gray-600"
-            />
-            <button
-              type="button"
-              onClick={() =>
-                setPasswords((prev) => ({
-                  ...prev,
-                  [`show${field[0].toUpperCase() + field.slice(1)}`]: !prev[`show${field[0].toUpperCase() + field.slice(1)}`],
-                }))
-              }
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-blue-500"
-            >
-              {passwords[`show${field[0].toUpperCase() + field.slice(1)}`] ? 'Hide' : 'Show'}
-            </button>
-          </div>
-        ))}
+
+        <input
+          type="password"
+          placeholder="Current Password"
+          value={passwords.current}
+          onChange={(e) => setPasswords({ ...passwords, current: e.target.value })}
+          className="w-full p-2 border rounded text-gray-600"
+        />
+
+        <input
+          type="password"
+          placeholder="New Password"
+          value={passwords.new}
+          onChange={(e) => setPasswords({ ...passwords, new: e.target.value })}
+          className="w-full p-2 border rounded text-gray-600"
+        />
+
+        <input
+          type="password"
+          placeholder="Confirm New Password"
+          value={passwords.confirm}
+          onChange={(e) => setPasswords({ ...passwords, confirm: e.target.value })}
+          className="w-full p-2 border rounded text-gray-600"
+        />
+
         <button
           onClick={handlePasswordChange}
           className="bg-purple-600 text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-purple-700"
@@ -173,7 +140,8 @@ export default function SettingsPage() {
           <Save size={16} />
           Update Password
         </button>
-        <p className="text-sm text-gray-500">{status.password}</p>
+
+        <p className="text-sm text-gray-500">{passwordStatus}</p>
       </div>
     </div>
   );

@@ -1,127 +1,125 @@
+// app/check-out/page.jsx
 'use client';
 
-import { useState } from 'react';
-import { UserPlus, Building2, Clock, Trash2, UserMinus } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { UserMinus } from 'lucide-react';
 
-export default function CheckInPage() {
-  const [checkIns, setCheckIns] = useState([]);
-  const [form, setForm] = useState({ name: '', department: '', purpose: '' });
-  const [error, setError] = useState('');
+export default function CheckOutPage() {
+  const [records, setRecords] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  const handleCheckIn = () => {
-    const { name, department, purpose } = form;
-    if (!name || !department || !purpose) {
-      setError('All fields are required.');
-      return;
-    }
-
-    const newEntry = {
-      id: Date.now(),
-      ...form,
-      time: new Date().toLocaleTimeString(),
-    };
-
-    setCheckIns([newEntry, ...checkIns]);
-    setForm({ name: '', department: '', purpose: '' });
-    setError('');
-  };
-
-  const handleTerminate = (id) => {
-    const confirmed = confirm("Are you sure you want to terminate this check-in?");
-    if (confirmed) {
-      setCheckIns((prev) => prev.filter((entry) => entry.id !== id));
+  const fetchRecords = async () => {
+    try {
+      const res = await fetch('/api/check');
+      const data = await res.json();
+      setRecords(data);
+    } catch (err) {
+      console.error('Failed to load data:', err);
     }
   };
+
+  useEffect(() => {
+    fetchRecords();
+  }, []);
+
+  const handleCheckOut = async (id) => {
+    setLoading(true);
+    try {
+      await fetch('/api/check', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
+      fetchRecords();
+    } catch (err) {
+      console.error('Check-out failed:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const currentlyCheckedIn = records.filter((r) => !r.checkOutTime);
+  const alreadyCheckedOut = records.filter((r) => r.checkOutTime);
 
   return (
     <div className="min-h-screen p-6 bg-gradient-to-br from-slate-50 to-indigo-100 space-y-10">
-      {/* Header */}
       <div className="flex items-center gap-4 text-2xl font-bold text-black">
-        <UserMinus className="text-green-600" />
+        <UserMinus className="text-red-600" />
         <h1>Check-Out Dashboard</h1>
       </div>
 
-      {/* Check-In Form */}
+      {/* Section: Checked-In Users */}
       <div className="bg-white p-6 rounded-xl shadow-md space-y-4">
-        <h2 className="text-xl font-semibold mb-2 text-gray-800">New Check-Out</h2>
+        <h2 className="text-xl font-semibold text-gray-800">Currently Checked-In</h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <input
-            type="text"
-            placeholder="Name"
-            className="p-2 border rounded w-full text-gray-600"
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-          />
-          <input
-            type="text"
-            placeholder="Department"
-            className="p-2 border rounded w-full text-gray-600"
-            value={form.department}
-            onChange={(e) => setForm({ ...form, department: e.target.value })}
-          />
-          <input
-            type="text"
-            placeholder="Purpose"
-            className="p-2 border rounded w-full text-gray-600"
-            value={form.purpose}
-            onChange={(e) => setForm({ ...form, purpose: e.target.value })}
-          />
-        </div>
-
-        {error && <p className="text-red-500">{error}</p>}
-
-        <button
-          onClick={handleCheckIn}
-          className="mt-4 bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition"
-        >
-          Check Out
-        </button>
-      </div>
-
-      {/* Check-In List */}
-      <div className="bg-white p-6 rounded-xl shadow-md">
-        <h2 className="text-xl font-semibold mb-4 text-gray-800">Check-Out Records</h2>
-
-        <div className="overflow-x-auto">
+        {currentlyCheckedIn.length === 0 ? (
+          <p className="text-gray-500">No one is currently checked in.</p>
+        ) : (
           <table className="min-w-full text-sm text-left">
             <thead className="bg-gray-100 text-gray-600 uppercase">
               <tr>
                 <th className="px-4 py-2">Name</th>
                 <th className="px-4 py-2">Department</th>
                 <th className="px-4 py-2">Purpose</th>
-                <th className="px-4 py-2">Time</th>
+                <th className="px-4 py-2">Check-In</th>
                 <th className="px-4 py-2">Action</th>
               </tr>
             </thead>
             <tbody>
-              {checkIns.map((entry) => (
-                <tr key={entry.id} className="border-t text-gray-600">
+              {currentlyCheckedIn.map((entry) => (
+                <tr key={entry._id} className="border-t text-gray-600">
                   <td className="px-4 py-2">{entry.name}</td>
                   <td className="px-4 py-2">{entry.department}</td>
                   <td className="px-4 py-2">{entry.purpose}</td>
-                  <td className="px-4 py-2">{entry.time}</td>
+                  <td className="px-4 py-2">{new Date(entry.checkInTime).toLocaleTimeString()}</td>
                   <td className="px-4 py-2">
                     <button
-                      onClick={() => handleTerminate(entry.id)}
-                      className="text-red-600 hover:text-red-800 flex items-center gap-1"
+                      onClick={() => handleCheckOut(entry._id)}
+                      className="bg-red-600 text-white px-4 py-1 rounded hover:bg-red-700 text-sm"
+                      disabled={loading}
                     >
-                      <Trash2 size={16} />
-                      Terminate
+                      {loading ? 'Checking Out...' : 'Check Out'}
                     </button>
                   </td>
                 </tr>
               ))}
-              {checkIns.length === 0 && (
-                <tr>
-                  <td colSpan="5" className="text-center text-gray-500 py-4">
-                    No check-ins yet.
-                  </td>
-                </tr>
-              )}
             </tbody>
           </table>
-        </div>
+        )}
+      </div>
+
+      {/* Section: Checked-Out Records */}
+      <div className="bg-white p-6 rounded-xl shadow-md">
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">Checked-Out Records</h2>
+
+        {alreadyCheckedOut.length === 0 ? (
+          <p className="text-gray-500">No check-outs yet.</p>
+        ) : (
+          <table className="min-w-full text-sm text-left">
+            <thead className="bg-gray-100 text-gray-600 uppercase">
+              <tr>
+                <th className="px-4 py-2">Name</th>
+                <th className="px-4 py-2">Department</th>
+                <th className="px-4 py-2">Purpose</th>
+                <th className="px-4 py-2">Check-In</th>
+                <th className="px-4 py-2">Check-Out</th>
+              </tr>
+            </thead>
+            <tbody>
+              {alreadyCheckedOut.map((entry) => (
+                <tr key={entry._id} className="border-t text-gray-600">
+                  <td className="px-4 py-2">{entry.name}</td>
+                  <td className="px-4 py-2">{entry.department}</td>
+                  <td className="px-4 py-2">{entry.purpose}</td>
+                  <td className="px-4 py-2">{new Date(entry.checkInTime).toLocaleTimeString()}</td>
+                  <td className="px-4 py-2 text-green-600">
+                    {new Date(entry.checkOutTime).toLocaleTimeString()}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );
