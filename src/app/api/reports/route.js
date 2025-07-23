@@ -1,7 +1,7 @@
 import { connectDB } from '@/config/mongoose';
 import Invoice from '@/models/Invoice';
 import User from '@/models/User';
-import Check from '@/models/CheckOut';
+import Check from '@/models/Check';
 import Expense from '@/models/Expense';
 
 export async function GET() {
