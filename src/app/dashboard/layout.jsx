@@ -8,9 +8,14 @@ export const metadata = {
 
 export default function DashboardLayout({ children }) {
   return (
-    <div className="flex min-h-screen">
-      <Sidebar />
-      <main className="flex-1 bg-gray-100 p-4 overflow-y-auto">
+    <div className="flex">
+      {/* Fixed Sidebar */}
+      <aside className="fixed top-0 left-0 w-64 h-screen z-50">
+        <Sidebar />
+      </aside>
+
+      {/* Main Content Area */}
+      <main className="flex-1 ml-64 bg-gray-100 p-4 min-h-screen overflow-y-auto">
         <AuthWrapper>{children}</AuthWrapper>
       </main>
     </div>

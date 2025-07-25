@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   LineChart,
   Activity,
@@ -19,62 +19,104 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-const revenueData = [
-  { month: 'Jan', revenue: 8200 },
-  { month: 'Feb', revenue: 9100 },
-  { month: 'Mar', revenue: 12800 },
-  { month: 'Apr', revenue: 9800 },
-  { month: 'May', revenue: 11000 },
-  { month: 'Jun', revenue: 12300 },
-];
-
-const teamActivities = [
-  'Sarah completed "Finance Audit Report"',
-  'John started "Client Onboarding Process"',
-  'Aisha reviewed "Quarterly Budget"',
-  'Mike commented on "ERP UI Design"',
-];
-
-const bills = [
-  {
-    name: 'Odoo - Monthly',
-    date: 'May 15',
-    lastCharge: '14 May, 2022',
-    amount: '$150',
-  },
-  {
-    name: 'M365 - Yearly',
-    date: 'June 16',
-    lastCharge: '14 May, 2022',
-    amount: '$559',
-  },
-];
-
-// New: Debit card slider data
-const debitCards = [
-  {
-    type: 'Debit Card',
-    number: '**** **** **** 2598',
-    balance: '$25,000',
-    bg: 'bg-rose-500',
-  },
-  {
-    type: 'Visa Card',
-    number: '**** **** **** 4983',
-    balance: '$18,720',
-    bg: 'bg-indigo-500',
-  },
-  {
-    type: 'MasterCard',
-    number: '**** **** **** 7832',
-    balance: '$34,200',
-    bg: 'bg-emerald-500',
-  },
-];
-
 export default function DashboardPage() {
   const [terminatedMembers, setTerminatedMembers] = useState([]);
   const [cardIndex, setCardIndex] = useState(0);
+  const [revenueData, setRevenueData] = useState([]);
+  const [bills, setBills] = useState([]);
+  const [teamActivities, setTeamActivities] = useState([]);
+  const [totalBalance, setTotalBalance] = useState(0);
+  const [goals, setGoals] = useState({ achieved: 0, target: 0 });
+
+  const debitCards = [
+    {
+      type: 'Debit Card',
+      number: '**** **** **** 2598',
+      balance: '$25,000',
+      bg: 'bg-rose-500',
+    },
+    {
+      type: 'Visa Card',
+      number: '**** **** **** 4983',
+      balance: '$18,720',
+      bg: 'bg-indigo-500',
+    },
+    {
+      type: 'MasterCard',
+      number: '**** **** **** 7832',
+      balance: '$34,200',
+      bg: 'bg-emerald-500',
+    },
+  ];
+
+  const currentCard = debitCards[cardIndex];
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const [expensesRes, invoicesRes, checkinRes, checkoutRes, usersRes] = await Promise.all([
+          fetch('/api/expenses'),
+          fetch('/api/invoices'),
+          fetch('/api/checkin'),
+          fetch('/api/check'),
+          fetch('/api/users'),
+        ]);
+
+        const [expenses, invoices, checkins, checkouts, users] = await Promise.all([
+          expensesRes.json(),
+          invoicesRes.json(),
+          checkinRes.json(),
+          checkoutRes.json(),
+          usersRes.json(),
+        ]);
+
+        // Revenue Trend from invoices
+        const invoiceMap = {};
+        invoices.forEach((inv) => {
+          const date = new Date(inv.date);
+          const month = date.toLocaleString('default', { month: 'short' });
+          invoiceMap[month] = (invoiceMap[month] || 0) + inv.amount;
+        });
+
+        const revenueArray = Object.keys(invoiceMap).map((month) => ({
+          month,
+          revenue: invoiceMap[month],
+        }));
+
+        setRevenueData(revenueArray);
+
+        // Upcoming Bills (dummy mapping from invoices)
+        const mappedBills = invoices.slice(0, 3).map((inv) => ({
+          name: inv.description || 'Invoice',
+          date: new Date(inv.date).toDateString(),
+          lastCharge: new Date(inv.date).toDateString(),
+          amount: `$${inv.amount}`,
+        }));
+
+        setBills(mappedBills);
+
+        // Team Activity from checkin/checkout
+        const activities = [...checkins, ...checkouts].map((entry) => {
+          return `${entry.name} ${entry.type === 'checkin' ? 'checked in' : 'checked out'}`;
+        });
+
+        setTeamActivities(activities.slice(0, 5));
+
+        // Total Balance (sum of invoices)
+        const total = invoices.reduce((acc, inv) => acc + inv.amount, 0);
+        setTotalBalance(total);
+
+        // Goals
+        const achieved = expenses.reduce((acc, e) => acc + e.amount, 0);
+        setGoals({ achieved, target: 20000 });
+
+      } catch (err) {
+        console.error('Failed to fetch dashboard data', err);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
 
   const handleTerminate = (member) => {
     const confirmed = confirm(`Are you sure you want to terminate ${member}?`);
@@ -91,23 +133,17 @@ export default function DashboardPage() {
     setCardIndex((prev) => (prev - 1 + debitCards.length) % debitCards.length);
   };
 
-  const currentCard = debitCards[cardIndex];
-
   return (
     <div className="space-y-8">
       <h1 className="text-3xl font-bold text-black">Welcome to your Dashboard</h1>
 
-      {/* Top Section */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Total Balance with Card Slider */}
         <div className="bg-white p-6 rounded-lg shadow space-y-4 text-gray-600">
           <h2 className="text-lg text-gray-700">Total Balance</h2>
           <div className="flex justify-between items-center">
-            <span className="text-2xl font-bold">$240,399</span>
+            <span className="text-2xl font-bold">${totalBalance}</span>
             <span className="text-sm text-gray-500">All Accounts</span>
           </div>
-
-          {/* Card Display */}
           <div className={`${currentCard.bg} text-white rounded-lg p-4 space-y-2`}>
             <p className="text-sm">Account Type</p>
             <p className="font-semibold text-lg">{currentCard.type}</p>
@@ -118,10 +154,7 @@ export default function DashboardPage() {
                 <ChevronRight className="w-4 h-4" />
               </div>
             </div>
-           
           </div>
-
-          {/* Slider Navigation */}
           <div className="flex items-center justify-between text-sm text-gray-400 pt-2">
             <button onClick={handlePrevCard} className="flex items-center gap-1 hover:text-black">
               <ChevronLeft className="w-4 h-4" /> Previous
@@ -137,12 +170,11 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Goals */}
         <div className="bg-white p-6 rounded-lg shadow space-y-4 text-gray-600">
           <h2 className="text-lg text-gray-700">Goals</h2>
           <div className="flex justify-between items-center">
-            <span className="text-2xl font-bold">$20,000</span>
-            <span className="text-sm text-gray-500">May, 2023</span>
+            <span className="text-2xl font-bold">${goals.target}</span>
+            <span className="text-sm text-gray-500">This Month</span>
           </div>
           <hr />
           <div className="text-sm space-y-1">
@@ -150,13 +182,13 @@ export default function DashboardPage() {
               <span className="flex gap-2 items-center">
                 <Target className="w-4 h-4" /> Target Achieved
               </span>
-              <span className="font-semibold">$12,500</span>
+              <span className="font-semibold">${goals.achieved}</span>
             </p>
             <p className="flex justify-between items-center text-gray-600">
               <span className="flex gap-2 items-center">
                 <CircleDollarSign className="w-4 h-4" /> This Month Target
               </span>
-              <span className="font-semibold">$20,000</span>
+              <span className="font-semibold">${goals.target}</span>
             </p>
           </div>
           <div className="text-center pt-4 text-sm text-gray-500">
@@ -164,7 +196,6 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Upcoming Bills */}
         <div className="bg-white p-6 rounded-lg shadow space-y-4">
           <div className="flex justify-between items-center text-gray-500">
             <h2 className="text-lg text-gray-600">Upcoming Bill</h2>
@@ -175,7 +206,7 @@ export default function DashboardPage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="bg-gray-100 px-3 py-2 rounded text-center text-gray-600">
-                    <p className="text-sm font-bold">{bill.date.split(' ')[0]}</p>
+                    <p className="text-sm font-bold">{bill.date.split(' ')[2]}</p>
                     <p className="text-xs uppercase">{bill.date.split(' ')[1]}</p>
                   </div>
                   <div>
@@ -192,9 +223,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Bottom Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Revenue Trend */}
         <div className="bg-white rounded-lg p-6 shadow">
           <h2 className="text-lg font-semibold text-gray-700 flex items-center gap-2 mb-4">
             <LineChart className="w-5 h-5 text-purple-600" />
@@ -211,7 +240,6 @@ export default function DashboardPage() {
           </ResponsiveContainer>
         </div>
 
-        {/* Team Activity */}
         <div className="bg-white rounded-lg p-6 shadow">
           <h2 className="text-lg font-semibold text-gray-700 flex items-center gap-2 mb-4">
             <Activity className="w-5 h-5 text-blue-600" />
@@ -224,9 +252,7 @@ export default function DashboardPage() {
               return (
                 <li
                   key={index}
-                  className={`flex justify-between items-center ${
-                    isTerminated ? 'line-through text-red-400' : ''
-                  }`}
+                  className={`flex justify-between items-center ${isTerminated ? 'line-through text-red-400' : ''}`}
                 >
                   <span>👤 {activity}</span>
                   <button
