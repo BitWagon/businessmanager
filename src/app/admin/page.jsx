@@ -26,7 +26,7 @@ export default function DashboardPage() {
   const [bills, setBills] = useState([]);
   const [teamActivities, setTeamActivities] = useState([]);
   const [totalBalance, setTotalBalance] = useState(0);
-  const [goals, setGoals] = useState({ achieved: 0, target: 20000 });
+  const [goals, setGoals] = useState({ achieved: 0, target: 0 });
 
   const debitCards = [
     {
@@ -70,6 +70,7 @@ export default function DashboardPage() {
           usersRes.json(),
         ]);
 
+        // Revenue Trend from invoices
         const invoiceMap = {};
         invoices.forEach((inv) => {
           const date = new Date(inv.date);
@@ -84,6 +85,7 @@ export default function DashboardPage() {
 
         setRevenueData(revenueArray);
 
+        // Upcoming Bills (dummy mapping from invoices)
         const mappedBills = invoices.slice(0, 3).map((inv) => ({
           name: inv.description || 'Invoice',
           date: new Date(inv.date).toDateString(),
@@ -93,15 +95,18 @@ export default function DashboardPage() {
 
         setBills(mappedBills);
 
+        // Team Activity from checkin/checkout
         const activities = [...checkins, ...checkouts].map((entry) => {
           return `${entry.name} ${entry.type === 'checkin' ? 'checked in' : 'checked out'}`;
         });
 
         setTeamActivities(activities.slice(0, 5));
 
+        // Total Balance (sum of invoices)
         const total = invoices.reduce((acc, inv) => acc + inv.amount, 0);
         setTotalBalance(total);
 
+        // Goals
         const achieved = expenses.reduce((acc, e) => acc + e.amount, 0);
         setGoals({ achieved, target: 20000 });
 

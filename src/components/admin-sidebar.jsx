@@ -27,16 +27,16 @@ export default function AdminSidebar() {
   const [isOpen, setIsOpen] = useState(true);
 
   const navItems = [
-    { label: 'Dashboard', icon: LayoutDashboard, href: '/admin/dashboard' },
-    { label: 'Expanses', icon: DollarSign, href: '/admin/expanses' },
-    { label: 'Analysis', icon: TrendingDown, href: '/admin/analysis' },
-    { label: 'Employee', icon: Users, href: '/admin/employee' },
-    { label: 'Check in', icon: CircleCheckBigIcon, href: '/admin/checkin' },
-    { label: 'Check out', icon: ListChecks, href: '/admin/checkout' },
-    { label: 'Invoices', icon: FileText, href: '/admin/invoices' },
-    { label: 'Reports', icon: BarChart2, href: '/admin/report' },
-    { label: 'Settings', icon: Settings, href: '/admin/setting' },
-    { label: 'Logout', icon: LogOut, href: '/admin/logout' },
+    { label: 'Dashboard', icon: LayoutDashboard, href: '/admin' },
+    { label: 'Expanses', icon: DollarSign, href: '/admin/admin-expanses' },
+    { label: 'Analysis', icon: TrendingDown, href: '/admin/admin-analysis' },
+    { label: 'Employee', icon: Users, href: '/admin/admin-employee' },
+    { label: 'Check in', icon: CircleCheckBigIcon, href: '/admin/admin-checkin' },
+    { label: 'Check out', icon: ListChecks, href: '/admin/admin-checkout' },
+    { label: 'Invoices', icon: FileText, href: '/admin/admin-invoices' },
+    { label: 'Reports', icon: BarChart2, href: '/admin/admin-report' },
+    { label: 'Settings', icon: Settings, href: '/admin/admin-setting' },
+    { label: 'Logout', icon: LogOut, href: '/admin/admin-logout' },
   ];
 
   return (
