@@ -15,11 +15,16 @@ export default function SettingsPage() {
 
   useEffect(() => {
     const fetchUser = async () => {
-     const res = await fetch('/api/me', {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-        });
+     const token = localStorage.getItem('authToken');
+
+    const res = await fetch('/api/me', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
       if (res.ok) {
         const data = await res.json();
         setProfile({ name: data.name, email: data.email });
