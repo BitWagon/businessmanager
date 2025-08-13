@@ -47,7 +47,7 @@ export default function Sidebar() {
       >
         <div className="flex justify-between items-center p-4 border-b border-gray-700">
           <span className={`text-xl font-bold ${!isOpen && 'hidden'}`}>
-            BlackLedger
+            Adminity
           </span>
           <button
             onClick={() => setIsOpen(!isOpen)}
