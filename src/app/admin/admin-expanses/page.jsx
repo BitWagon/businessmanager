@@ -55,7 +55,7 @@ export default function ExpensePage() {
 
   return (
     <div className="p-6 space-y-10 bg-gray-50 min-h-screen">
-      <h2 className='font-black text-black text-2xl'>Expenses</h2>
+      <h2 className='font-bold text-black text-3xl font-sans'>Expenses</h2>
 
       {/* Overview */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-6">

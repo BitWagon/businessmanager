@@ -112,7 +112,7 @@ export default function AnalysisPage() {
         {/* Weekly Line Chart */}
         <div className="bg-white p-6 rounded-2xl shadow-sm">
           <h2 className="text-lg font-semibold mb-4 text-gray-700">Weekly Expenses</h2>
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={300} className='text-gray-600'>
             <RLChart data={weeklyData}>
               <XAxis dataKey="name" />
               <YAxis />

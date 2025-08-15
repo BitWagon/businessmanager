@@ -229,7 +229,7 @@ export default function DashboardPage() {
             <LineChart className="w-5 h-5 text-purple-600" />
             Revenue Trend
           </h2>
-          <ResponsiveContainer width="100%" height={250}>
+          <ResponsiveContainer width="100%" height={250} className='text-gray-600'>
             <ReLineChart data={revenueData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="month" />
